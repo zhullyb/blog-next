@@ -15,22 +15,15 @@
 
 	const route = useRoute()
 
-	const allPosts = (
+	const Posts = (
 		await useAsyncData(`tag-${route.params.tag}`, () =>
 			queryCollection('posts')
+				.where('tags', '=', decodeURIComponent(route.params.tag as string))
 				.order('date', 'DESC')
-				.select('title', 'date', 'path', 'tags')
+				.select('title', 'date', 'path')
 				.all()
 		)
 	).data as Ref<Post[]>
-
-	const Posts = computed(() => {
-		return allPosts.value.filter(post =>
-			typeof post.tags?.map === 'function'
-				? post.tags?.includes(decodeURIComponent(route.params.tag as string))
-				: false
-		)
-	})
 
 	if (Posts.value.length === 0) {
 		throw createError({ statusCode: 404, statusMessage: 'Tag not found', fatal: true })
